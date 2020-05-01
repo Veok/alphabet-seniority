@@ -1,0 +1,53 @@
+:- use_module(library(lists)).
+
+numbers(W) :-
+ upper(W,Z),
+ atom_chars(B,Z),
+ atom_codes(B,L),
+ toAlp(L,T), 
+ rankify(T,[],0,0,1,1,Result),
+ print(Result).
+
+toAlp(Xs, Ys) :- maplist(sub, Xs, Ys).
+sub(X, Y) :- Y is X - 64.
+upper(Xs, Ys) :- maplist(toUpper, Xs, Ys).
+toUpper(Lower, Upper) :- char_type(Lower, to_lower(Upper)).
+
+rankify(Array, RankArray, I, J,R,S,Result) :- 
+    length(Array,L),
+    I < L,
+    J < L ->  
+  	  addR(R,J,I,Array,R2),
+   	  addS(S,J,I,Array,S2),
+      NJ is J + 1,
+     rankify(Array,RankArray,I,NJ,R2,S2,Result);
+      true,
+    nth0(I, Array, N),
+    V is R + 0.5 * (S - 1),
+    addElement(V,RankArray,NewRankArray),
+    NI is I + 1,
+    rankify(Array,NewRankArray,NI,0,1,1,Result);
+    true,
+    Result = RankArray
+  .
+
+addElement(X, [], [X]). 
+addElement(X, [Y | Rest1], [Y | Rest2]) :- addElement(X, Rest1, Rest2).
+
+addR(R, J, I, Array, R2) :-
+    nth0(J,Array,JE),
+    nth0(I,Array, IE),
+    J =\= I , JE < IE ->  
+    R2 is R + 1;
+	true,
+    R2 is R
+    .
+
+addS(S, J,I,Array,S2) :-
+    nth0(J,Array,JE),
+    nth0(I,Array, IE),
+    J =\= I , JE =:= IE ->  
+    S2 is S + 1;
+	true,
+    S2 is S
+    .
